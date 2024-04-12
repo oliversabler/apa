@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/oliversabler/egglang/lexer"
@@ -24,6 +25,37 @@ func TestBangOperator(t *testing.T) {
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
 		testBooleanObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestBuiltinFunctions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`längd("")`, 0},
+		{`längd("fyra")`, 4},
+		{`längd("hej världen")`, 12},
+		{`längd(1)`, "argument to `längd` not supported, got=INTEGER"},
+		{`längd("ett", "två")`, "wrong number of arguments. got=2, want=1"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		switch expected := tt.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case string:
+			errObj, ok := evaluated.(*object.Error)
+			if !ok {
+				t.Errorf("object is not Error. got=%T (%+v)", evaluated, evaluated)
+				continue
+			}
+			if errObj.Message != expected {
+				t.Errorf("wrong error message. expected=%q, got=%q", expected, errObj.Message)
+			}
+		}
 	}
 }
 
@@ -85,6 +117,10 @@ func TestErrorHandling(t *testing.T) {
 			"foobar",
 			"identifier not found: foobar",
 		},
+		{
+			`"Hej" - "Världen"`,
+			"unknown operator: STRING - STRING",
+		},
 	}
 
 	for _, tt := range tests {
@@ -99,6 +135,66 @@ func TestErrorHandling(t *testing.T) {
 		if errObj.Message != tt.expectedMessage {
 			t.Errorf("wrong error message. expected=%q, got=%q",
 				tt.expectedMessage, errObj.Message)
+		}
+	}
+}
+
+func TestArrayIndexExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			"[1, 2, 3][0]",
+			1,
+		},
+		{
+			"[1, 2, 3][1]",
+			2,
+		},
+		{
+			"[1, 2, 3][2]",
+			3,
+		},
+		{
+			"låt i = 0; [1][i];",
+			1,
+		},
+		{
+			"[1, 2, 3][1 + 1];",
+			3,
+		},
+		{
+			"låt minArray = [1, 2, 3]; minArray[2];",
+			3,
+		},
+		{
+			"låt minArray = [1, 2, 3]; minArray[0] + minArray[1] + minArray[2];",
+			6,
+		},
+		{
+			"låt minArray = [1, 2, 3]; låt i = minArray[0]; minArray[i]",
+			2,
+		},
+		{
+			"[1, 2, 3][3]",
+			nil,
+		},
+		{
+			"[1, 2, 3][-1]",
+			nil,
+		},
+	}
+
+	for i, tt := range tests {
+		fmt.Printf("%d\n", i)
+		fmt.Printf("%s\n", tt.input)
+		evaluated := testEval(tt.input)
+		integer, ok := tt.expected.(int)
+		if ok {
+			testIntegerObject(t, evaluated, int64(integer))
+		} else {
+			testNullObject(t, evaluated)
 		}
 	}
 }
@@ -270,6 +366,54 @@ func TestFunctionObject(t *testing.T) {
 
 	if fn.Body.String() != expectedBody {
 		t.Fatalf("body is not %q. got=%q", expectedBody, fn.Body.String())
+	}
+}
+
+func TestArrayLiterals(t *testing.T) {
+	input := "[1, 2 * 2, 3 + 3]"
+
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.Array)
+
+	if !ok {
+		t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if len(result.Elements) != 3 {
+		t.Fatalf("array has wrong num of elements. got=%d",
+			len(result.Elements))
+	}
+
+	testIntegerObject(t, result.Elements[0], 1)
+	testIntegerObject(t, result.Elements[1], 4)
+	testIntegerObject(t, result.Elements[2], 6)
+}
+
+func TestStringLiteral(t *testing.T) {
+	input := `"Hej Världen!"`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%v+)", evaluated, evaluated)
+	}
+
+	if str.Value != "Hej Världen!" {
+		t.Errorf("String has wrong value. got=%q", str.Value)
+	}
+}
+
+func TestStringConcatination(t *testing.T) {
+	input := `"Hej" + " " + "Världen!"`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if str.Value != "Hej Världen!" {
+		t.Errorf("String has wrong value. got=%q", str.Value)
 	}
 }
 

@@ -22,7 +22,10 @@ om (5 < 10) {
 }
 
 10 == 10;
-10 != 9;`
+10 != 9;
+"foobar"
+"foo bar"
+låt arr = [1, 2]; arr[1];`
 
 	tests := []struct {
 		expectedType    token.TokenType
@@ -101,6 +104,26 @@ om (5 < 10) {
 		{token.NOTEQUAL, "!="},
 		{token.INT, "9"},
 		{token.SEMICOLON, ";"},
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
+
+		{token.LET, "låt"},
+		{token.IDENT, "arr"},
+		{token.ASSIGN, "="},
+
+		{token.LBRACKET, "["},
+		{token.INT, "1"},
+		{token.COMMA, ","},
+		{token.INT, "2"},
+		{token.RBRACKET, "]"},
+		{token.SEMICOLON, ";"},
+
+		{token.IDENT, "arr"},
+		{token.LBRACKET, "["},
+		{token.INT, "1"},
+		{token.RBRACKET, "]"},
+		{token.SEMICOLON, ";"},
+
 		{token.EOF, ""},
 	}
 

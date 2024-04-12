@@ -10,18 +10,46 @@ import (
 
 type ObjectType string
 
+type BuiltinFunction func(args ...Object) Object
+
 const (
+	ARRAY_OBJ        = "ARRAY"
 	BOOLEAN_OBJ      = "BOOLEAN"
+	BUILTIN_OBJ      = "BUILTIN"
 	ERROR_OBJ        = "ERROR"
 	FUNCTION_OBJ     = "FUNCTION"
 	INTEGER_OBJ      = "INTEGER"
 	NULL_OBJ         = "NULL"
 	RETURN_VALUE_OBJ = "RETURN"
+	STRING_OBJ       = "STRING"
 )
 
 type Object interface {
 	Inspect() string
 	Type() ObjectType
+}
+
+type Array struct {
+	Elements []Object
+}
+
+func (a *Array) Inspect() string {
+	var out bytes.Buffer
+
+	elements := []string{}
+	for _, el := range a.Elements {
+		elements = append(elements, el.Inspect())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
+func (a *Array) Type() ObjectType {
+	return ARRAY_OBJ
 }
 
 type Boolean struct {
@@ -34,6 +62,18 @@ func (b *Boolean) Inspect() string {
 
 func (b *Boolean) Type() ObjectType {
 	return BOOLEAN_OBJ
+}
+
+type Builtin struct {
+	Fn BuiltinFunction
+}
+
+func (b *Builtin) Inspect() string {
+	return "builtin function"
+}
+
+func (b *Builtin) Type() ObjectType {
+	return BUILTIN_OBJ
 }
 
 type Error struct {
@@ -109,4 +149,16 @@ func (rv *ReturnValue) Inspect() string {
 
 func (rv *ReturnValue) Type() ObjectType {
 	return RETURN_VALUE_OBJ
+}
+
+type String struct {
+	Value string
+}
+
+func (s *String) Inspect() string {
+	return s.Value
+}
+
+func (s *String) Type() ObjectType {
+	return STRING_OBJ
 }
