@@ -1,7 +1,6 @@
 package evaluator
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/oliversabler/egglang/lexer"
@@ -121,6 +120,10 @@ func TestErrorHandling(t *testing.T) {
 			`"Hej" - "Världen"`,
 			"unknown operator: STRING - STRING",
 		},
+		{
+			`{"namn": "Apa"}[funktion(x) { x }];`,
+			"unusable as hash key: FUNCTION",
+		},
 	}
 
 	for _, tt := range tests {
@@ -186,9 +189,53 @@ func TestArrayIndexExpression(t *testing.T) {
 		},
 	}
 
-	for i, tt := range tests {
-		fmt.Printf("%d\n", i)
-		fmt.Printf("%s\n", tt.input)
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		integer, ok := tt.expected.(int)
+		if ok {
+			testIntegerObject(t, evaluated, int64(integer))
+		} else {
+			testNullObject(t, evaluated)
+		}
+	}
+}
+
+func TestHashIndexExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`{"foo": 5}["foo"]`,
+			5,
+		},
+		{
+			`{"foo": 5}["bar"]`,
+			nil,
+		},
+		{
+			`låt key = "foo"; {"foo": 5}[key]`,
+			5,
+		},
+		{
+			`{}["foo"]`,
+			nil,
+		},
+		{
+			`{5: 5}[5]`,
+			5,
+		},
+		{
+			`{sant: 5}[sant]`,
+			5,
+		},
+		{
+			`{falskt: 5}[falskt]`,
+			5,
+		},
+	}
+
+	for _, tt := range tests {
 		evaluated := testEval(tt.input)
 		integer, ok := tt.expected.(int)
 		if ok {
@@ -387,6 +434,47 @@ func TestArrayLiterals(t *testing.T) {
 	testIntegerObject(t, result.Elements[0], 1)
 	testIntegerObject(t, result.Elements[1], 4)
 	testIntegerObject(t, result.Elements[2], 6)
+}
+
+func TestHashLiteral(t *testing.T) {
+	input := `låt två = "två";
+    {
+        "ett": 10 - 9,
+        två: 1 + 1,
+        "tr" + "e": 6 / 2,
+        4: 4,
+        sant: 5,
+        falskt: 6
+    }`
+
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.Hash)
+	if !ok {
+		t.Fatalf("eval didn't return Hash. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	expected := map[object.HashKey]int64{
+		(&object.String{Value: "ett"}).HashKey(): 1,
+		(&object.String{Value: "två"}).HashKey(): 2,
+		(&object.String{Value: "tre"}).HashKey(): 3,
+		(&object.Integer{Value: 4}).HashKey():    4,
+		TRUE.HashKey():                           5,
+		FALSE.HashKey():                          6,
+	}
+
+	if len(result.Pairs) != len(expected) {
+		t.Fatalf("Hash has wrong number of pairs. got=%d", len(result.Pairs))
+	}
+
+	for expectedKey, expectedValue := range expected {
+		pair, ok := result.Pairs[expectedKey]
+		if !ok {
+			t.Errorf("no pair for given key in Pairs %T: %d", expectedKey, expectedValue)
+		}
+
+		testIntegerObject(t, pair.Value, expectedValue)
+	}
+
 }
 
 func TestStringLiteral(t *testing.T) {
