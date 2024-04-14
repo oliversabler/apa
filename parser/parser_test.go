@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/oliversabler/egglang/ast"
-	"github.com/oliversabler/egglang/lexer"
+	"github.com/oliversabler/apa/ast"
+	"github.com/oliversabler/apa/lexer"
 )
 
 func TestCallExpressionParsing(t *testing.T) {

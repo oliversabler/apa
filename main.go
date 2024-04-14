@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/oliversabler/egglang/repl"
+	"github.com/oliversabler/apa/repl"
 )
 
 func main() {

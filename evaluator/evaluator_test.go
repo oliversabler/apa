@@ -3,9 +3,9 @@ package evaluator
 import (
 	"testing"
 
-	"github.com/oliversabler/egglang/lexer"
-	"github.com/oliversabler/egglang/object"
-	"github.com/oliversabler/egglang/parser"
+	"github.com/oliversabler/apa/lexer"
+	"github.com/oliversabler/apa/object"
+	"github.com/oliversabler/apa/parser"
 )
 
 func TestBangOperator(t *testing.T) {

@@ -1,6 +1,6 @@
 package lexer
 
-import "github.com/oliversabler/egglang/token"
+import "github.com/oliversabler/apa/token"
 
 type Lexer struct {
 	input        string

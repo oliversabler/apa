@@ -3,7 +3,7 @@ package lexer
 import (
 	"testing"
 
-	"github.com/oliversabler/egglang/token"
+	"github.com/oliversabler/apa/token"
 )
 
 func TestNextToken(t *testing.T) {

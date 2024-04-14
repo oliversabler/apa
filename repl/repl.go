@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/oliversabler/egglang/evaluator"
-	"github.com/oliversabler/egglang/lexer"
-	"github.com/oliversabler/egglang/object"
-	"github.com/oliversabler/egglang/parser"
+	"github.com/oliversabler/apa/evaluator"
+	"github.com/oliversabler/apa/lexer"
+	"github.com/oliversabler/apa/object"
+	"github.com/oliversabler/apa/parser"
 )
 
 const PROMPT = ">> "

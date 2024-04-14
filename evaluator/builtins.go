@@ -3,7 +3,7 @@ package evaluator
 import (
 	"fmt"
 
-	"github.com/oliversabler/egglang/object"
+	"github.com/oliversabler/apa/object"
 )
 
 var builtins = map[string]*object.Builtin{

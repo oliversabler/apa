@@ -6,7 +6,7 @@ import (
 	"hash/fnv"
 	"strings"
 
-	"github.com/oliversabler/egglang/ast"
+	"github.com/oliversabler/apa/ast"
 )
 
 type ObjectType string

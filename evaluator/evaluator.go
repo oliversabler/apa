@@ -3,8 +3,8 @@ package evaluator
 import (
 	"fmt"
 
-	"github.com/oliversabler/egglang/ast"
-	"github.com/oliversabler/egglang/object"
+	"github.com/oliversabler/apa/ast"
+	"github.com/oliversabler/apa/object"
 )
 
 var (

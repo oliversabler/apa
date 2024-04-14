@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/oliversabler/egglang/ast"
-	"github.com/oliversabler/egglang/lexer"
-	"github.com/oliversabler/egglang/token"
+	"github.com/oliversabler/apa/ast"
+	"github.com/oliversabler/apa/lexer"
+	"github.com/oliversabler/apa/token"
 )
 
 const (

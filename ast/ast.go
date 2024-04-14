@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/oliversabler/egglang/token"
+	"github.com/oliversabler/apa/token"
 )
 
 type Node interface {
